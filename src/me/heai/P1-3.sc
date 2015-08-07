@@ -1,4 +1,3 @@
-
 sealed trait List[+A] {
   override def toString() = {
     this match {
@@ -245,3 +244,171 @@ concat(List(List(1), List(1), List()))
 concat(List(List(), List(1), List(1)))
 concat(List(List(1), List(), List(1)))
 concat(List(List(1), List(1), List(1)))
+/**
+ * exercise 3.16
+ * @param l
+ * @return
+ */
+def add1(l: List[Int]): List[Int] = {
+  foldRightViaFoldLeft(l, List[Int]()){
+    (e: Int, acc: List[Int]) => Cons(e + 1, acc)
+  }
+}
+
+add1(List())
+add1(List(1))
+add1(List(1, 2))
+/**
+ * exercise 3.17
+ * @param l
+ * @return
+ */
+def doubleToString(l: List[Double]): List[String] = {
+  foldRightViaFoldLeft(l, List[String]()){
+    (e: Double, acc: List[String]) => Cons(e.toString, acc)
+  }
+}
+
+doubleToString(List())
+doubleToString(List(1.))
+doubleToString(List(1., 2.))
+/**
+ * exercise 3.18
+ * @param as
+ * @param f
+ * @tparam A
+ * @tparam B
+ * @return
+ */
+def map[A,B](as: List[A])(f: A => B): List[B] = {
+  foldRightViaFoldLeft(as, List[B]()){
+    (e: A, acc: List[B]) => Cons(f(e), acc)
+  }
+}
+
+map(List[Int]())(_.toDouble)
+map(List(1))(_.toDouble)
+map(List(1, 2))(_.toString)
+/**
+ * exercise 3.19
+ * @param as
+ * @param f
+ * @tparam A
+ * @return
+ */
+def filter[A](as: List[A])(f: A => Boolean): List[A] = {
+  foldRightViaFoldLeft(as, List[A]()){
+    (e: A, acc: List[A]) => {
+      if (f(e)) Cons(e, acc) else acc
+    }
+  }
+}
+
+filter(List[Int]())( _ % 2 == 0)
+filter(List[Int](1))( _ % 2 == 0)
+filter(List[Int](1, 2))( _ % 2 == 0)
+/**
+ * exercise 3.20
+ * @param as
+ * @param f
+ * @tparam A
+ * @tparam B
+ * @return
+ */
+def flatMap[A,B](as: List[A])(f: A => List[B]): List[B] = {
+  concat(map(as)(f))
+}
+flatMap(List[Int]())((e: Int) => List(e.toString, e.toString))
+flatMap(List[Int](1))((e: Int) => List(e.toString, e.toString))
+flatMap(List[Int](1, 2))((e: Int) => List(e.toString, e.toString))
+/**
+ * exercise 3.21
+ * @param l
+ * @param f
+ * @tparam A
+ * @return
+ */
+def filterViaFlatMap[A](l: List[A])(f: A => Boolean): List[A] = {
+  flatMap(l) {
+    (e: A) => if (f(e)) List(e) else Nil
+  }
+}
+
+filterViaFlatMap(List[Int]())( _ % 2 == 0)
+filterViaFlatMap(List[Int](1))( _ % 2 == 0)
+filterViaFlatMap(List[Int](1, 2))( _ % 2 == 0)
+/**
+ * exercise 3.22
+ * @param a
+ * @param b
+ * @return
+ */
+def addPairwise(a: List[Int], b: List[Int]): List[Int] = {
+  (a, b) match {
+    case (Cons(ah: Int, at), Cons(bh: Int, bt)) => Cons(ah + bh, addPairwise(at, bt))
+    case (Nil, _) => Nil
+    case (_, Nil) => Nil
+  }
+}
+
+addPairwise(List[Int](), List[Int]())
+addPairwise(List[Int](), List[Int](1))
+addPairwise(List[Int](1), List[Int]())
+addPairwise(List[Int](1), List[Int](1))
+addPairwise(List[Int](1), List[Int](1, 2))
+addPairwise(List[Int](1, 2), List[Int](1))
+addPairwise(List[Int](1,2 ), List[Int](1, 2))
+/**
+ * exercise 3.23
+ * @param a
+ * @param b
+ * @param f
+ * @tparam A
+ * @tparam B
+ * @tparam C
+ * @return
+ */
+def zipWith[A,B,C](a: List[A], b: List[B])(f: (A,B) => C): List[C] = {
+  (a, b) match {
+    case (Cons(ah, at), Cons(bh, bt)) => Cons(f(ah, bh), zipWith(at, bt)(f))
+    case (Nil, _) => Nil
+    case (_, Nil) => Nil
+  }
+}
+
+zipWith(List[Int](), List[Int]())(_ + _)
+zipWith(List[Int](), List[Int](1))(_ + _)
+zipWith(List[Int](1), List[Int]())(_ + _)
+zipWith(List[Int](1), List[Int](1))(_ + _)
+zipWith(List[Int](1), List[Int](1, 2))(_ + _)
+zipWith(List[Int](1, 2), List[Int](1))(_ + _)
+zipWith(List[Int](1,2 ), List[Int](1, 2))(_ + _)
+/**
+ * exercise 3.24
+ * @param sup
+ * @param sub
+ * @tparam A
+ * @return
+ */
+def hasSubsequence[A](sup: List[A], sub: List[A]): Boolean = {
+  def containsFromStart(a: List[A], b: List[A]): Boolean = {
+    (a, b) match {
+      case (_, Nil) => true
+      case (Cons(ah, at), Cons(bh, bt)) if ah == bh => containsFromStart(at, bt)
+      case _ => false
+    }
+  }
+  sup match {
+    case Nil => sub == Nil
+    case Cons(head, tail) => if (containsFromStart(sup, sub)) true else hasSubsequence(tail, sub)
+  }
+}
+
+hasSubsequence(List[Int](), List[Int]())
+hasSubsequence(List[Int](), List[Int](1))
+hasSubsequence(List[Int](1), List[Int]())
+hasSubsequence(List[Int](1), List[Int](1))
+hasSubsequence(List[Int](1, 2), List[Int](1))
+hasSubsequence(List[Int](1, 2), List[Int](2))
+hasSubsequence(List[Int](1, 2, 3), List[Int](2))
+hasSubsequence(List[Int](1), List[Int](1, 2))
