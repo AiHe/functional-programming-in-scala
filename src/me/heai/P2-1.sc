@@ -38,3 +38,5 @@ def map(x: => X): X = {
 fork(loop)
 
 map(loop)(new A())
+
+

@@ -1,31 +1,5 @@
-sealed trait List[+A] {
-  override def toString() = {
-    this match {
-      case Cons(a, b) => a.toString + "->" + b.toString
-      case _ => "^"
-    }
-  }
-}
+import me.heai.datastructure._
 
-case object Nil extends List[Nothing]
-
-case class Cons[+A](head: A, tail: List[A]) extends List[A]
-
-object List {
-  def sum(ints: List[Int]): Int = ints match {
-    case Nil => 0
-    case Cons(x, xs) => x + sum(xs)
-  }
-  def product(ds: List[Double]): Double = ds match {
-    case Nil => 1.0
-    case Cons(0.0, _) => 0.0
-    case Cons(x, xs) => x * product(xs)
-  }
-  def apply[A](as: A*): List[A] = {
-    if (as.isEmpty) Nil
-    else Cons(as.head, apply(as.tail: _*))
-  }
-}
 val ex1: List[Double] = Nil
 val ex2: List[Int] = Cons(1, Nil)
 val ex3: List[String] = Cons("a", Cons("b", Nil))
@@ -59,7 +33,6 @@ def setHead[A](l: List[A], a: A): List[A] = {
     case Cons(head, tail) => Cons(a, tail)
   }
 }
-
 //setHead(Nil, 1)
 setHead(List(3, 2, 1), 1)
 /**
@@ -190,7 +163,6 @@ def foldRightViaFoldLeft[A,B](l: List[A], z: B)(f: (A,B) => B): B = {
     (acc:B, e:A) => f(e, acc)
   }
 }
-
 /**
  * exercise 3.14-1
  * @param l
@@ -203,7 +175,6 @@ def appendViaFoldRight[A](l: List[A], r: List[A]): List[A] = {
     (e: A, acc: List[A]) => Cons(e, acc)
   }
 }
-
 appendViaFoldRight(List(), List(1, 2))
 appendViaFoldRight(List(1, 2), List())
 appendViaFoldRight(List(1, 2), List(3, 4))
@@ -250,7 +221,6 @@ def add1(l: List[Int]): List[Int] = {
     (e: Int, acc: List[Int]) => Cons(e + 1, acc)
   }
 }
-
 add1(List())
 add1(List(1))
 add1(List(1, 2))
@@ -264,7 +234,6 @@ def doubleToString(l: List[Double]): List[String] = {
     (e: Double, acc: List[String]) => Cons(e.toString, acc)
   }
 }
-
 doubleToString(List())
 doubleToString(List(1.))
 doubleToString(List(1., 2.))
@@ -281,7 +250,6 @@ def map[A,B](as: List[A])(f: A => B): List[B] = {
     (e: A, acc: List[B]) => Cons(f(e), acc)
   }
 }
-
 map(List[Int]())(_.toDouble)
 map(List(1))(_.toDouble)
 map(List(1, 2))(_.toString)
@@ -329,7 +297,6 @@ def filterViaFlatMap[A](l: List[A])(f: A => Boolean): List[A] = {
     (e: A) => if (f(e)) List(e) else Nil
   }
 }
-
 filterViaFlatMap(List[Int]())( _ % 2 == 0)
 filterViaFlatMap(List[Int](1))( _ % 2 == 0)
 filterViaFlatMap(List[Int](1, 2))( _ % 2 == 0)
@@ -434,7 +401,6 @@ def dfs[A, B](t: Tree[A], z: B)(f: (A, B) => B): B = {
     case Branch(left, right) => dfs(right, dfs(left, z)(f))(f)
   }
 }
-
 /**
  * exercise 3.26
  * @param t
@@ -511,7 +477,6 @@ def sizeViaFold[A](t: Tree[A]): Int = {
 }
 sizeViaFold(sampleTree1)
 sizeViaFold(sampleTree2)
-
 /**
  * exercise 3.29-3
  * @param t
@@ -522,7 +487,6 @@ def maximumViaFold(t: Tree[Int]): Int = {
 }
 maximumViaFold(sampleTree1)
 maximumViaFold(sampleTree2)
-
 /**
  * exercise 3.29-4
  * @param t
@@ -535,8 +499,6 @@ def depthViaFold[A](t: Tree[A]): Int = {
 
 depthViaFold(sampleTree1)
 depthViaFold(sampleTree2)
-
-
 
 
 
