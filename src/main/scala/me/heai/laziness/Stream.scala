@@ -15,7 +15,7 @@ sealed trait Stream[+A] {
   def toList: List[A] = {
     def helper(s: Stream[A], acc: List[A]): List[A] = {
       s match {
-        case Cons(h: A, t) => helper(t(), h :: acc)
+        case Cons(h, t) => helper(t(), h() :: acc)
         case _ => acc
       }
     }
@@ -68,9 +68,7 @@ sealed trait Stream[+A] {
 
 
   def exists(p: A => Boolean): Boolean = {
-    foldRight(false) {
-      (e: A, acc: Boolean) => acc || p(e)
-    }
+    foldRight(false)((e, acc) => acc || p(e))
   }
 
   /**
@@ -91,9 +89,7 @@ sealed trait Stream[+A] {
    * @return
    */
   def forAllViaFoldRight(p: A => Boolean): Boolean = {
-    foldRight(true) {
-      (e: A, acc: Boolean) => acc && p(e)
-    }
+    foldRight(true){case (e, acc) => acc && p(e)}
   }
 
   /**
@@ -103,7 +99,7 @@ sealed trait Stream[+A] {
    */
   def takeWhileViaFoldRight(f: A => Boolean): Stream[A] = {
     foldRight(empty[A]) {
-      (e: A, acc: Stream[A]) => {
+      case (e, acc) => {
         if (f(e)) cons(e, acc)
         else empty
       }
@@ -130,7 +126,7 @@ sealed trait Stream[+A] {
    */
   def map[B](f: A => B): Stream[B] = {
     foldRight(empty[B]) {
-      (e: A, acc: Stream[B]) => cons(f(e), acc)
+      (e, acc) => cons(f(e), acc)
     }
   }
 
@@ -142,7 +138,7 @@ sealed trait Stream[+A] {
    */
   def append[B >: A](s: => Stream[B]): Stream[B] = {
     foldRight(s) {
-      (e: A, acc: Stream[B]) => cons(e, acc)
+      (e, acc) => cons(e, acc)
     }
   }
 
@@ -154,7 +150,7 @@ sealed trait Stream[+A] {
    */
   def flatMap[B](f: A => Stream[B]): Stream[B] = {
     foldRight(empty[B]) {
-      (e: A, acc: Stream[B]) => f(e).append(acc)
+      (e, acc) => f(e).append(acc)
     }
   }
 
@@ -165,7 +161,7 @@ sealed trait Stream[+A] {
    */
   def filter(f: A => Boolean): Stream[A] = {
     foldRight(empty[A]) {
-      (e: A, acc: Stream[A]) => if (f(e)) cons(e, acc) else acc
+      (e, acc) => if (f(e)) cons(e, acc) else acc
     }
   }
 
@@ -237,6 +233,47 @@ sealed trait Stream[+A] {
       case (Empty, Cons(h2, t2)) => Some(((None, Some(h2())), (empty, t2())))
       case (Empty, Empty) => None
     }
+  }
+
+  /**
+   * exercise 5.14
+   * @param s
+   * @tparam A
+   * @return
+   */
+  def startsWith[A](s: Stream[A]): Boolean = {
+    zipAll(s).takeWhileViaUnfold(!_._2.isEmpty).forAllViaFoldRight{
+      case (Some(h1), Some(h2)) if h1 == h2 => true
+      case _ => false
+    }
+  }
+
+
+  /**
+   * exercise 5.15
+   * @return
+   */
+  def tails: Stream[Stream[A]] = {
+    unfold(this){
+      case s@Cons(h, t) => Some((s, t()))
+      case Empty => None
+    }.append(Stream(empty))
+  }
+
+  /**
+   * exercise 5.16
+   * @param z
+   * @param f
+   * @tparam B
+   * @return
+   */
+  def scanRight[B](z: B)(f: (A, => B) => B): Stream[B] = {
+    foldRight(z, Stream(z)){
+      case (e, (acc1, acc2)) => {
+        val tmp: B = f(e, acc1)
+        (tmp, cons(tmp, acc2))
+      }
+    }._2
   }
 }
 

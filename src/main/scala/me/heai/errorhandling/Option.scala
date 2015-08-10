@@ -34,6 +34,11 @@ class Option[+A] {
       case _ => None
     }
   }
+
+  def isEmpty = this match {
+    case None => true
+    case _ => false
+  }
 }
 
 case class Some[+A](get: A) extends Option[A]

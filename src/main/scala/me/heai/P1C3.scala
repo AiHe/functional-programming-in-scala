@@ -150,7 +150,7 @@ object P1C3 extends App {
    * exercise 3.11-2
    * @param ns
    */
-  def product3(ns: List[Double]) = foldLeft(ns, 1.)(_ * _)
+  def product3(ns: List[Double]) = foldLeft(ns, 1.0)(_ * _)
 
   println(product3(List()))
   println(product3(List(1)))
@@ -265,8 +265,8 @@ object P1C3 extends App {
   }
 
   println(doubleToString(List()))
-  println(doubleToString(List(1.)))
-  println(doubleToString(List(1., 2.)))
+  println(doubleToString(List(1.0)))
+  println(doubleToString(List(1.0, 2.0)))
 
   /**
    * exercise 3.18
