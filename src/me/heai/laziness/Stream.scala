@@ -6,6 +6,7 @@ package me.heai.laziness
 sealed trait Stream[+A] {
 
   import Stream._
+  import me.heai.errorhandling._
 
   /**
    * exercise 5.1
@@ -168,6 +169,75 @@ sealed trait Stream[+A] {
     }
   }
 
+//  def unfold[A, S](z: S)(f: S => Option[(A, S)]): Stream[A]
+
+  /**
+   * exercise 5.13-1
+   * @param f
+   * @tparam B
+   * @return
+   */
+  def mapViaUnfold[B](f: A => B): Stream[B] = {
+    unfold(this){
+      case Cons(h, t) => Some((f(h()), t()))
+      case _ => None
+    }
+  }
+
+
+  /**
+   * exercise 5.13-2
+   * @param n
+   * @return
+   */
+  def takeViaUnfold(n: Int): Stream[A] = {
+    unfold((this, n)){
+      case (Cons(h, t), n) if n > 1 => Some((h(), (t(), n-1)))
+      case _ => None
+    }
+  }
+
+  /**
+   * exercise 5.13-3
+   * @param f
+   * @return
+   */
+  def takeWhileViaUnfold(f: A => Boolean): Stream[A] = {
+    unfold(this){
+      case Cons(h, t) if f(h()) => Some((h(), t()))
+      case _ => None
+    }
+  }
+
+  /**
+   * exercise 5.13-4
+   * @param s2
+   * @param f
+   * @tparam B
+   * @tparam C
+   * @return
+   */
+  def zipWith[B,C](s2: Stream[B])(f: (A,B) => C): Stream[C] = {
+    unfold((this, s2)){
+      case (Cons(h1, t1), Cons(h2, t2)) => Some((f(h1(), h2()), (t1(), t2())))
+      case _ => None
+    }
+  }
+
+  /**
+   * exercise 5.13-5
+   * @param s2
+   * @tparam B
+   * @return
+   */
+  def zipAll[B](s2: Stream[B]): Stream[(Option[A],Option[B])] = {
+    unfold((this, s2)){
+      case (Cons(h1, t1), Cons(h2, t2)) => Some(((Some(h1()), Some(h2())), (t1(), t2())))
+      case (Cons(h1, t1), Empty) => Some(((Some(h1()), None), (t1(), empty)))
+      case (Empty, Cons(h2, t2)) => Some(((None, Some(h2())), (empty, t2())))
+      case (Empty, Empty) => None
+    }
+  }
 }
 
 case object Empty extends Stream[Nothing]
