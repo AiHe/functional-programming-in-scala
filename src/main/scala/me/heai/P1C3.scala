@@ -301,9 +301,9 @@ object P1C3 extends App {
     }
   }
 
-  filter(List[Int]())(_ % 2 == 0)
-  filter(List[Int](1))(_ % 2 == 0)
-  filter(List[Int](1, 2))(_ % 2 == 0)
+  println(filter(List[Int]())(_ % 2 == 0))
+  println(filter(List[Int](1))(_ % 2 == 0))
+  println(filter(List[Int](1, 2))(_ % 2 == 0))
 
   /**
    * exercise 3.20
@@ -317,9 +317,9 @@ object P1C3 extends App {
     concat(map(as)(f))
   }
 
-  flatMap(List[Int]())((e: Int) => List(e.toString, e.toString))
-  flatMap(List[Int](1))((e: Int) => List(e.toString, e.toString))
-  flatMap(List[Int](1, 2))((e: Int) => List(e.toString, e.toString))
+  println(flatMap(List[Int]())((e: Int) => List(e.toString, e.toString)))
+  println(flatMap(List[Int](1))((e: Int) => List(e.toString, e.toString)))
+  println(flatMap(List[Int](1, 2))((e: Int) => List(e.toString, e.toString)))
 
   /**
    * exercise 3.21
@@ -334,9 +334,9 @@ object P1C3 extends App {
     }
   }
 
-  filterViaFlatMap(List[Int]())(_ % 2 == 0)
-  filterViaFlatMap(List[Int](1))(_ % 2 == 0)
-  filterViaFlatMap(List[Int](1, 2))(_ % 2 == 0)
+  println(filterViaFlatMap(List[Int]())(_ % 2 == 0))
+  println(filterViaFlatMap(List[Int](1))(_ % 2 == 0))
+  println(filterViaFlatMap(List[Int](1, 2))(_ % 2 == 0))
 
   /**
    * exercise 3.22
@@ -352,13 +352,13 @@ object P1C3 extends App {
     }
   }
 
-  addPairwise(List[Int](), List[Int]())
-  addPairwise(List[Int](), List[Int](1))
-  addPairwise(List[Int](1), List[Int]())
-  addPairwise(List[Int](1), List[Int](1))
-  addPairwise(List[Int](1), List[Int](1, 2))
-  addPairwise(List[Int](1, 2), List[Int](1))
-  addPairwise(List[Int](1, 2), List[Int](1, 2))
+  println(addPairwise(List[Int](), List[Int]()))
+  println(addPairwise(List[Int](), List[Int](1)))
+  println(addPairwise(List[Int](1), List[Int]()))
+  println(addPairwise(List[Int](1), List[Int](1)))
+  println(addPairwise(List[Int](1), List[Int](1, 2)))
+  println(addPairwise(List[Int](1, 2), List[Int](1)))
+  println(addPairwise(List[Int](1, 2), List[Int](1, 2)))
 
   /**
    * exercise 3.23
@@ -378,13 +378,13 @@ object P1C3 extends App {
     }
   }
 
-  zipWith(List[Int](), List[Int]())(_ + _)
-  zipWith(List[Int](), List[Int](1))(_ + _)
-  zipWith(List[Int](1), List[Int]())(_ + _)
-  zipWith(List[Int](1), List[Int](1))(_ + _)
-  zipWith(List[Int](1), List[Int](1, 2))(_ + _)
-  zipWith(List[Int](1, 2), List[Int](1))(_ + _)
-  zipWith(List[Int](1, 2), List[Int](1, 2))(_ + _)
+  println(zipWith(List[Int](), List[Int]())(_ + _))
+  println(zipWith(List[Int](), List[Int](1))(_ + _))
+  println(zipWith(List[Int](1), List[Int]())(_ + _))
+  println(zipWith(List[Int](1), List[Int](1))(_ + _))
+  println(zipWith(List[Int](1), List[Int](1, 2))(_ + _))
+  println(zipWith(List[Int](1, 2), List[Int](1))(_ + _))
+  println(zipWith(List[Int](1, 2), List[Int](1, 2))(_ + _))
 
   /**
    * exercise 3.24
@@ -407,14 +407,14 @@ object P1C3 extends App {
     }
   }
 
-  hasSubsequence(List[Int](), List[Int]())
-  hasSubsequence(List[Int](), List[Int](1))
-  hasSubsequence(List[Int](1), List[Int]())
-  hasSubsequence(List[Int](1), List[Int](1))
-  hasSubsequence(List[Int](1, 2), List[Int](1))
-  hasSubsequence(List[Int](1, 2), List[Int](2))
-  hasSubsequence(List[Int](1, 2, 3), List[Int](2))
-  hasSubsequence(List[Int](1), List[Int](1, 2))
+  println(hasSubsequence(List[Int](), List[Int]()))
+  println(hasSubsequence(List[Int](), List[Int](1)))
+  println(hasSubsequence(List[Int](1), List[Int]()))
+  println(hasSubsequence(List[Int](1), List[Int](1)))
+  println(hasSubsequence(List[Int](1, 2), List[Int](1)))
+  println(hasSubsequence(List[Int](1, 2), List[Int](2)))
+  println(hasSubsequence(List[Int](1, 2, 3), List[Int](2)))
+  println(hasSubsequence(List[Int](1), List[Int](1, 2)))
 
   sealed trait Tree[+A]
 
@@ -438,8 +438,8 @@ object P1C3 extends App {
     }
   }
 
-  size(sampleTree1)
-  size(sampleTree2)
+  println(size(sampleTree1))
+  println(size(sampleTree2))
 
   def dfs[A, B](t: Tree[A], z: B)(f: (A, B) => B): B = {
     t match {
@@ -460,8 +460,8 @@ object P1C3 extends App {
     }
   }
 
-  maximum(sampleTree1)
-  maximum(sampleTree2)
+  println(maximum(sampleTree1))
+  println(maximum(sampleTree2))
 
   /**
    * exercise 3.27
@@ -476,8 +476,8 @@ object P1C3 extends App {
     }
   }
 
-  depth(sampleTree1)
-  depth(sampleTree2)
+  println(depth(sampleTree1))
+  println(depth(sampleTree2))
 
   /**
    * exercise 3.28
@@ -495,8 +495,8 @@ object P1C3 extends App {
   }
 
 
-  map(sampleTree1)(_ + 1)
-  map(sampleTree2)(_ + 1)
+  println(map(sampleTree1)(_ + 1))
+  println(map(sampleTree2)(_ + 1))
 
   /**
    * exercise 3.29-1
@@ -524,8 +524,8 @@ object P1C3 extends App {
     fold(t)(_ => 1)(_ + _)
   }
 
-  sizeViaFold(sampleTree1)
-  sizeViaFold(sampleTree2)
+  println(sizeViaFold(sampleTree1))
+  println(sizeViaFold(sampleTree2))
 
   /**
    * exercise 3.29-3
@@ -536,8 +536,8 @@ object P1C3 extends App {
     fold(t)((a: Int) => a)((a: Int, b: Int) => a max b)
   }
 
-  maximumViaFold(sampleTree1)
-  maximumViaFold(sampleTree2)
+  println(maximumViaFold(sampleTree1))
+  println(maximumViaFold(sampleTree2))
 
   /**
    * exercise 3.29-4
@@ -549,7 +549,7 @@ object P1C3 extends App {
     fold(t)(_ => 1)((a: Int, b: Int) => (a max b) + 1)
   }
 
-  depthViaFold(sampleTree1)
-  depthViaFold(sampleTree2)
+  println(depthViaFold(sampleTree1))
+  println(depthViaFold(sampleTree2))
 
 }
