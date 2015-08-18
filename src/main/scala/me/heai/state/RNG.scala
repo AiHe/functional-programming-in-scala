@@ -3,7 +3,7 @@ package me.heai.state
 /**
  * Created by aihe on 8/10/15.
  */
-trait RNG {
+sealed trait RNG {
   def nextInt: (Int, RNG)
 }
 
