@@ -1,6 +1,6 @@
 package me.heai.parallelism
 
-//import java.util.concurrent.ExecutorService
+import java.util.concurrent._
 
 import scala.concurrent.duration.TimeUnit
 
@@ -11,21 +11,21 @@ object Par {
 
   type Par[A] = ExecutorService => Future[A]
 
-  trait ExecutorService {
-    def submit[A](a: Callable[A]): Future[A]
-  }
+//  trait ExecutorService {
+//    def submit[A](a: Callable[A]): Future[A]
+//  }
 
-  trait Callable[A] {
-    def call: A
-  }
-
-  trait Future[A] {
-    def get: A
-    def get(timeout: Long, unit: TimeUnit): A
-    def cancel(evenIfRunning: Boolean): Boolean
-    def isDone: Boolean
-    def isCancelled: Boolean
-  }
+//  trait Callable[A] {
+//    def call: A
+//  }
+//
+//  trait Future[A] {
+//    def get: A
+//    def get(timeout: Long, unit: TimeUnit): A
+//    def cancel(evenIfRunning: Boolean): Boolean
+//    def isDone: Boolean
+//    def isCancelled: Boolean
+//  }
 
   def unit[A](a: A): Par[A] = (es: ExecutorService) => UnitFuture(a)
 
@@ -89,6 +89,27 @@ object Par {
     map(sequenceBalanced(ps.toVector))(_.toList)
   }
 
+  def equal[A](e: ExecutorService)(p: Par[A], p2: Par[A]): Boolean = {
+    val a = p(e).get
+    println(a)
+    val b = p2(e).get
+    println(b)
+    a == b
+  }
 
+  def delay[A](fa: => Par[A]): Par[A] = es => fa(es)
+
+
+  def main(args: Array[String]) {
+    // Good, because fork(a) = fork(unit(42 + 1))
+    val a = unit(42 + 1)
+    val S = Executors.newFixedThreadPool(1)
+    println(equal(S)(a, fork(a)))
+
+    // Deadlock, because fork(b) = fork(fork(unit(42 + 1)))
+    val b = lazyUnit(42 + 1)
+    val T = Executors.newFixedThreadPool(1)
+    println(equal(T)(b, fork(b)))
+  }
 
 }
