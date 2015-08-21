@@ -87,6 +87,7 @@ object NonBlockingScalaFuture {
 
       def reportFailure(t: Throwable) {}
     }
+
     println(equal(S)(a, fork(a)))
     equalSide(S)(a, fork(a))
 
