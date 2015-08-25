@@ -2,6 +2,7 @@ package me.heai.parallelism
 
 import java.util.concurrent._
 
+import scala.collection.generic.SeqFactory
 import scala.concurrent.duration.TimeUnit
 
 /**
@@ -103,6 +104,7 @@ object Par {
   def sequenceBalanced[A](as: IndexedSeq[Par[A]]): Par[IndexedSeq[A]] = fork {
     as match {
       case Vector() => unit(Vector())
+      case Vector(a) => map(a)(Vector(_))
       case a => {
         val (f, l) = a.splitAt(a.size / 2)
         map2(sequenceBalanced(f), sequenceBalanced(l))(_ ++ _)
