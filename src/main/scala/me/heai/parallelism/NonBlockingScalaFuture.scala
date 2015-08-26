@@ -24,6 +24,10 @@ object NonBlockingScalaFuture {
     map2(pa, unit())((a, _) => f(a))
   }
 
+  def flatMap[A, B](pa: Par[A])(f: A => Par[B]): Par[B] = {
+    es => pa(es).flatMap(a => f(a)(es))
+  }
+
 
   def fork[A](a: => Par[A]): Par[A] = a
 
