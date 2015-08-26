@@ -62,7 +62,7 @@ object NonBlockingScalaFuture {
   }
 
   def equalSide[A](e: ExecutionContext)(p: Par[A], p2: Par[A]): Unit = {
-    p(e).zip(p2(e)).map { case (a, b) => a == b }(e).onSuccess ({
+    p(e).zip(p2(e)).map { case (a, b) => a == b }(e).onSuccess({
       case true => println(true)
       case false => println(false)
     })(e)

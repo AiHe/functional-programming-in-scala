@@ -1,18 +1,18 @@
 package me.heai.monoid
 
-import me.heai.parallelism.NonBlockingScalaFuture.Par
+import scala.collection.immutable.HashMap
 
 /**
  * Created by aihe on 8/20/15.
  */
-trait Monoid[A] {
-
-  def op(a1: A, a2: A): A
-
-  def zero: A
-}
 
 object Monoid {
+
+  trait Monoid[A] {
+    def op(a1: A, a2: A): A
+
+    def zero: A
+  }
 
   val stringMonoid = new Monoid[String] {
     def op(a1: String, a2: String) = a1 + a2
@@ -202,8 +202,125 @@ object Monoid {
     }
   }
 
+  trait Foldable[F[_]] {
+    def foldRight[A, B](as: F[A])(z: B)(f: (A, B) => B): B = {
+      foldMap(as)(f.curried)(endoMonoid[B])(z)
+    }
+
+    def foldLeft[A, B](as: F[A])(z: B)(f: (B, A) => B): B = {
+      foldMap(as)(a => (b: B) => f(b, a))(endoMonoid[B])(z)
+    }
+
+    def foldMap[A, B](as: F[A])(f: A => B)(mb: Monoid[B]): B = {
+      foldRight(as)(mb.zero)((a, b) => mb.op(f(a), b))
+    }
+
+    def concatenate[A](as: F[A])(m: Monoid[A]): A = foldLeft(as)(m.zero)(m.op)
+
+    def toList[A](fa: F[A]): List[A] = {
+      foldMap(fa)(a => List(a))(listMonoid)
+    }
+  }
+
+  object ListFoldable extends Foldable[List] {
+    override def foldRight[A, B](as: List[A])(z: B)(f: (A, B) => B): B = as.foldRight(z)(f)
+
+    override def foldLeft[A, B](as: List[A])(z: B)(f: (B, A) => B): B = as.foldLeft(z)(f)
+
+    override def foldMap[A, B](as: List[A])(f: (A) => B)(mb: Monoid[B]): B = {
+      foldLeft(as)(mb.zero)((acc, e) => mb.op(acc, f(e)))
+    }
+  }
+
+  object IndexedSeqFoldable extends Foldable[IndexedSeq] {
+    override def foldRight[A, B](as: IndexedSeq[A])(z: B)(f: (A, B) => B): B = as.foldRight(z)(f)
+
+    override def foldLeft[A, B](as: IndexedSeq[A])(z: B)(f: (B, A) => B): B = as.foldLeft(z)(f)
+
+    override def foldMap[A, B](as: IndexedSeq[A])(f: (A) => B)(mb: Monoid[B]): B = {
+      foldRight(as)(mb.zero)((e, acc) => mb.op(f(e), acc))
+    }
+  }
+
+  object StreamFoldable extends Foldable[Stream] {
+    override def foldRight[A, B](as: Stream[A])(z: B)(f: (A, B) => B): B = as.foldRight(z)(f)
+
+    override def foldLeft[A, B](as: Stream[A])(z: B)(f: (B, A) => B): B = as.foldLeft(z)(f)
+
+    override def foldMap[A, B](as: Stream[A])(f: (A) => B)(mb: Monoid[B]): B = {
+      foldRight(as)(mb.zero)((e, acc) => mb.op(f(e), acc))
+    }
+  }
+
+  sealed trait Tree[+A]
+
+  case class Leaf[A](value: A) extends Tree[A]
+
+  case class Branch[A](left: Tree[A], right: Tree[A]) extends Tree[A]
+
+  object TreeFoldable extends Foldable[Tree] {
+    override def foldRight[A, B](as: Tree[A])(z: B)(f: (A, B) => B): B = as match {
+      case Leaf(v) => f(v, z)
+      case Branch(l, r) => foldRight(l)(foldRight(r)(z)(f))(f)
+    }
+
+    override def foldLeft[A, B](as: Tree[A])(z: B)(f: (B, A) => B): B = {
+      foldMap(as)(a => (b: B) => f(b, a))(endoMonoid[B])(z)
+    }
+
+    override def foldMap[A, B](as: Tree[A])(f: (A) => B)(mb: Monoid[B]): B = as match {
+      case Leaf(v) => f(v)
+      case Branch(l, r) => mb.op(foldMap(l)(f)(mb), foldMap(r)(f)(mb))
+    }
+  }
+
+  object OptionFoldable extends Foldable[Option] {
+    override def foldRight[A, B](as: Option[A])(z: B)(f: (A, B) => B): B = as match {
+      case Some(v) => f(v, z)
+      case None => z
+    }
+
+    override def foldLeft[A, B](as: Option[A])(z: B)(f: (B, A) => B): B = as match {
+      case Some(v) => f(z, v)
+      case None => z
+    }
+
+    override def foldMap[A, B](as: Option[A])(f: (A) => B)(mb: Monoid[B]): B = as match {
+      case Some(v) => f(v)
+      case None => mb.zero
+    }
+  }
+
+  def productMonoid[A, B](A: Monoid[A], B: Monoid[B]): Monoid[(A, B)] = {
+    new Monoid[(A, B)] {
+      override def op(x: (A, B), y: (A, B)): (A, B) = (A.op(x._1, y._1), B.op(x._2, y._2))
+
+      override def zero: (A, B) = (A.zero, B.zero)
+    }
+  }
+
+  def functionMonoid[A, B](B: Monoid[B]): Monoid[A => B] = {
+    new Monoid[(A) => B] {
+      override def op(f: (A) => B, g: (A) => B): (A) => B = a => B.op(f(a), g(a))
+
+      override def zero: (A) => B = a => B.zero
+    }
+  }
+
+  def bag[A](as: IndexedSeq[A]): Map[A, Int] = {
+    val mapMergeMonoid: Monoid[HashMap[A, Int]] = new Monoid[HashMap[A, Int]] {
+
+      override def op(ma: HashMap[A, Int], mb: HashMap[A, Int]): HashMap[A, Int] = {
+        ma.merged(mb) { case ((a, b), (_, d)) => (a, b + d) }
+      }
+
+      override def zero: HashMap[A, Int] = HashMap()
+    }
+    IndexedSeqFoldable.foldMap(as)(a => HashMap(a -> 1))(mapMergeMonoid)
+  }
+
 
   def main(args: Array[String]) {
-
+    println(bag(IndexedSeq(1, 2, 1, 3, 2, 1)))
   }
 }
