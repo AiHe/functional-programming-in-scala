@@ -152,7 +152,7 @@ trait Parsers[ParseError, Parser[+ _]] {
   /** Unescaped or escaped string literals, like "An \n important \"Quotation\"" or "bar". */
   // rather annoying to write, left as an exercise
   // we'll just use quoted (unescaped literals) for now
-  def escapedQuoted: Parser[String]
+  def escapedQuoted: Parser[String] = token(quoted)
 
 
   /** Parser which consumes reluctantly until it encounters the given string. */
@@ -193,7 +193,7 @@ trait Parsers[ParseError, Parser[+ _]] {
 
 
   /** Wraps `p` in start/stop delimiters. */
-  def surround[A](start: Parser[Any], stop: Parser[Any])(p: => Parser[A]) = {
+  def  surround[A](start: Parser[Any], stop: Parser[Any])(p: => Parser[A]) = {
     start *> p <* stop
   }
 
@@ -232,7 +232,31 @@ trait Parsers[ParseError, Parser[+ _]] {
     def *>[B](p2: => Parser[B]) = self.skipL(p, p2)
 
     def <*(p2: => Parser[Any]) = self.skipR(p, p2)
+
+    def sep(p2: Parser[Any]): Parser[List[A]] = self.sep(p, p2)
+
+    def sep1(p2: Parser[Any]): Parser[List[A]] = self.sep1(p, p2)
   }
 
+}
+
+case class Location(input: String, offset: Int = 0) {
+
+  lazy val line = input.slice(0, offset + 1).count(_ == '\n') + 1
+  lazy val col = input.slice(0, offset + 1).reverse.indexOf('\n')
+
+  def toError(msg: String): ParseError =
+    ParseError(List((this, msg)))
+
+  def advanceBy(n: Int) = copy(offset = offset + n)
+
+  /* Returns the line corresponding to this location */
+  def currentLine: String =
+    if (input.length > 1) input.lines.drop(line - 1).next
+    else ""
+}
+
+case class ParseError(stack: List[(Location, String)] = List(),
+                      otherFailures: List[ParseError] = List()) {
 }
 
