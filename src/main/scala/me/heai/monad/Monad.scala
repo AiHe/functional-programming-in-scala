@@ -4,11 +4,10 @@ import me.heai.parallelism.NonBlockingScalaFuture
 import me.heai.parallelism.NonBlockingScalaFuture.Par
 import me.heai.errorhandling._
 import me.heai.laziness._
-import me.heai.datastructure._
 
 /**
- * Created by aihe on 8/26/15.
- */
+  * Created by aihe on 8/26/15.
+  */
 
 trait Functor[F[_]] {
   def map[A, B](fa: F[A])(f: A => B): F[B]
@@ -37,7 +36,9 @@ object Monad {
 
     def map[A, B](ma: F[A])(f: A => B): F[B] = flatMap(ma)(a => unit(f(a)))
 
-    def map2[A, B, C](ma: F[A], mb: F[B])(f: (A, B) => C): F[C] = flatMap(ma)(a => map(mb)(b => f(a, b)))
+    def map2[A, B, C](ma: F[A], mb: => F[B])(f: (A, B) => C): F[C] = {
+      flatMap(ma)(a => map(mb)(b => f(a, b)))
+    }
   }
 
   val parMonad = new Monad[Par] {
@@ -61,7 +62,7 @@ object Monad {
   val listMonad = new Monad[List] {
     override def unit[A](a: => A): List[A] = List(a)
 
-    override def flatMap[A, B](ma: List[A])(f: (A) => List[B]): List[B] = List.flatMap(ma)(f)
+    override def flatMap[A, B](ma: List[A])(f: (A) => List[B]): List[B] = ma.flatMap(f)
   }
 
 }

@@ -1,14 +1,15 @@
 package me.heai.parallelism
 
-import java.util.concurrent.{Executors, ExecutorService}
+import java.util.concurrent.Executors
 
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 
 /**
- * Created by aihe on 8/19/15.
- */
+  * Created by aihe on 8/19/15.
+  */
 object NonBlockingScalaFuture {
 
   type Par[A] = ExecutionContext => Future[A]
